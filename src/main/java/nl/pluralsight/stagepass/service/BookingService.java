@@ -33,7 +33,7 @@ public class BookingService {
     }
 
     public List<Booking> getBookingsByConcert(Long concertId) {
-        return bookingRepository.findAll();
+        return bookingRepository.findByConcertId(concertId);
     }
 
     @Transactional
@@ -41,8 +41,12 @@ public class BookingService {
         Concert concert = concertRepository.findById(booking.getConcert().getId())
                 .orElseThrow(() -> new RuntimeException("Concert not found"));
 
+        if (concert.getAvailableSeats() <= booking.getNumberOfTickets()) {
+           throw new InsufficientSeatsException("Concert room is full");
+        }
+
         // Compute total price
-        booking.setTotalPrice(BigDecimal.ZERO);
+        booking.setTotalPrice(getTotalPrice(booking, concert));
 
         // Set booking date and concert reference
         booking.setBookingDate(LocalDate.now());
@@ -57,6 +61,10 @@ public class BookingService {
         return saved;
     }
 
+    BigDecimal getTotalPrice(Booking booking, Concert concert) {
+        return concert.getTicketPrice()
+                .multiply(BigDecimal.valueOf(booking.getNumberOfTickets()));
+    }
 
 
     public boolean cancelBooking(Long id) {
