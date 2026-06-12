@@ -48,8 +48,16 @@ public class BookingService {
         booking.setBookingDate(LocalDate.now());
         booking.setConcert(concert);
 
-        return bookingRepository.save(booking);
+        Booking saved = bookingRepository.save(booking);
+
+        concert.setAvailableSeats(concert.getAvailableSeats() - booking.getNumberOfTickets());
+        concertRepository.save(concert);
+
+
+        return saved;
     }
+
+
 
     public boolean cancelBooking(Long id) {
         if (bookingRepository.existsById(id)) {
