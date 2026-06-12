@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface ConcertRepository extends JpaRepository<Concert, Long> {
     List<Concert> findByArtistId(Long artistId);
+    List<Concert> findByDateAfterOrderByDateAsc(LocalDate date);
 }
